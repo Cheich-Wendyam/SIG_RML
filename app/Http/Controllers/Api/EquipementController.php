@@ -15,7 +15,7 @@ class EquipementController extends Controller
     public function index()
     {
         $equipements = Equipement::all();
-        return response()->json($equipements);
+        return response()->json(['content' => $equipements]);
     }
 
     /**
@@ -113,4 +113,15 @@ class EquipementController extends Controller
 
         return response()->json(['message' => 'Équipement supprimé avec succès']);
     }
+
+    /**
+     * Afficher les réservations d'un équipement.
+     */
+    public function reservations($id)
+    {
+        $equipement = Equipement::findOrFail($id);
+        return response()->json($equipement->reservations);
+    }
+
+
 }

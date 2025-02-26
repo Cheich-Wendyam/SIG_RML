@@ -100,6 +100,31 @@ class UserController extends Controller
         return response()->json($user->laboratoires);
     }
 
+     // get users by role
+     public function getUsersbyRole(string $role)
+{
+    // Vérifier si le rôle est valide (ajuste selon tes rôles disponibles)
+    $rolesDisponibles = ['admin', 'reservant', 'responsable'];
+
+    if (!in_array($role, $rolesDisponibles)) {
+        return response()->json([
+            'message' => 'Rôle invalide. Rôles disponibles : ' . implode(', ', $rolesDisponibles)
+        ], 400);
+    }
+
+    // Récupérer les utilisateurs du rôle donné
+    $users = User::where('role', $role)->get();
+
+    if ($users->isEmpty()) {
+        return response()->json([
+            'message' => 'Aucun utilisateur trouvé pour ce rôle.'
+        ], 404);
+    }
+
+    return response()->json($users, 200);
+}
+
+
 
 }
 

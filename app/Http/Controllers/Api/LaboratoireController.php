@@ -46,9 +46,10 @@ class LaboratoireController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        //
+        $laboratoire = Laboratoire::findOrFail($id);
+        return response()->json($laboratoire);
     }
 
     /**
@@ -62,9 +63,19 @@ class LaboratoireController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request,  $id)
     {
-        //
+        $request->validate([
+            'nom' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'responsable_id' => 'required|exists:users,id',
+            'ufr_id' => 'required|exists:ufrs,id',
+        ]);
+
+        $laboratoire = Laboratoire::findOrFail($id);
+        $laboratoire->update($request->all());
+
+        return response()->json($laboratoire);
     }
 
     /**
@@ -72,6 +83,16 @@ class LaboratoireController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $laboratoire = Laboratoire::findOrFail($id);
+        $laboratoire->delete();
+
+        return response()->json(null, 204);
+    }
+
+    public function getEquipements($id)
+    {
+        $laboratoire = Laboratoire::findOrFail($id);
+        $equipements = $laboratoire->equipements;
+        return response()->json($equipements);
     }
 }
