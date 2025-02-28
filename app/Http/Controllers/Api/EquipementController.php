@@ -14,7 +14,8 @@ class EquipementController extends Controller
      */
     public function index()
     {
-        $equipements = Equipement::all();
+        // Récupérer tous les équipements avec leur laboratoire
+        $equipements = Equipement::with('laboratoire')->get();
         return response()->json(['content' => $equipements]);
     }
 
@@ -23,25 +24,40 @@ class EquipementController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'nom' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'estdisponible' => 'boolean',
-            'estmutualisable' => 'boolean',
-            'etat' => 'string|in:neuf,bon état,usé,endommagé',
-            'acquereur' => 'nullable|string',
-            'typeacquisition' => 'required|string',
-            'laboratoire_id' => 'required|exists:laboratoires,id'
-        ]);
+        try {
+            $validatedData = $request->validate([
+                'nom' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'estdisponible' => 'boolean',
+                'estmutualisable' => 'boolean',
+                'etat' => 'string',
+                'acquereur' => 'nullable|string',
+                'typeacquisition' => 'required|string',
+                'laboratoire_id' => 'required|exists:laboratoires,id'
+            ]);
 
-        if ($request->hasFile('image')) {
-            $validatedData['image'] = $request->file('image')->store('equipements', 'public');
+            if ($request->hasFile('image')) {
+                $validatedData['image'] = $request->file('image')->store('equipements', 'public');
+            }
+
+            $equipement = Equipement::create($validatedData);
+
+            return response()->json([
+                'message' => 'Équipement ajouté avec succès',
+                'equipement' => $equipement
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Erreur de validation',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Une erreur est survenue',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $equipement = Equipement::create($validatedData);
-
-        return response()->json(['message' => 'Équipement ajouté avec succès', 'equipement' => $equipement], 201);
     }
 
     /**
@@ -63,35 +79,51 @@ class EquipementController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $equipement = Equipement::find($id);
+        try {
+            $equipement = Equipement::find($id);
 
-        if (!$equipement) {
-            return response()->json(['message' => 'Équipement non trouvé'], 404);
-        }
-
-        $validatedData = $request->validate([
-            'nom' => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'estdisponible' => 'boolean',
-            'estmutualisable' => 'boolean',
-            'etat' => 'string|in:neuf,bon état,usé,endommagé',
-            'acquereur' => 'nullable|string',
-            'typeacquisition' => 'sometimes|string',
-            'laboratoire_id' => 'sometimes|exists:laboratoires,id'
-        ]);
-
-        if ($request->hasFile('image')) {
-            // Supprimer l'ancienne image si elle existe
-            if ($equipement->image) {
-                Storage::disk('public')->delete($equipement->image);
+            if (!$equipement) {
+                return response()->json(['message' => 'Équipement non trouvé'], 404);
             }
-            $validatedData['image'] = $request->file('image')->store('equipements', 'public');
+
+            $validatedData = $request->validate([
+                'nom' => 'sometimes|string|max:255',
+                'description' => 'nullable|string',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'estdisponible' => 'boolean',
+                'estmutualisable' => 'boolean',
+                'etat' => 'string|in:neuf,bon état,usé,endommagé',
+                'acquereur' => 'nullable|string',
+                'typeacquisition' => 'sometimes|string',
+                'laboratoire_id' => 'sometimes|exists:laboratoires,id'
+            ]);
+
+            if ($request->hasFile('image')) {
+                // Supprimer l'ancienne image si elle existe
+                if ($equipement->image) {
+                    Storage::disk('public')->delete($equipement->image);
+                }
+                $validatedData['image'] = $request->file('image')->store('equipements', 'public');
+            }
+
+            $equipement->update($validatedData);
+
+            return response()->json([
+                'message' => 'Équipement mis à jour avec succès',
+                'equipement' => $equipement
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Erreur de validation',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Une erreur est survenue',
+                'error' => $e->getMessage()
+            ], 500);
         }
 
-        $equipement->update($validatedData);
-
-        return response()->json(['message' => 'Équipement mis à jour avec succès', 'equipement' => $equipement]);
     }
 
     /**

@@ -8,6 +8,9 @@ use App\Models\Reservation;
 use Illuminate\Support\Facades\Auth;
 use App\Mail\ReservationValidated;
 use Illuminate\Support\Facades\Mail;
+use App\Models\User;
+use App\Mail\ReservationRefused;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 
 class ReservationController extends Controller
@@ -124,17 +127,58 @@ class ReservationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        try {
+            // Vérifier si la réservation existe
+            $reservation = Reservation::findOrFail($id);
+
+            // Validation des données entrantes
+            $validatedData = $request->validate([
+                'date_debut' => 'sometimes|date',
+                'date_fin' => 'sometimes|date|after_or_equal:date_debut',
+                'motif' => 'nullable|string',
+                'commentaire' => 'nullable|string',
+                'info_utilisateur' => 'nullable|json',
+            ]);
+
+            // Mise à jour des champs
+            $reservation->update($validatedData);
+
+            return response()->json([
+                'message' => 'Réservation mise à jour avec succès',
+                'reservation' => $reservation
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Erreur de validation',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Une erreur est survenue',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        try {
+            $reservation = Reservation::findOrFail($id);
+            $reservation->delete();
+            return response()->json([
+                'message' => 'Réservation supprimée avec succès'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Une erreur est survenue',
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     public function validerReservation($id)
@@ -167,6 +211,87 @@ class ReservationController extends Controller
     }
 
     return response()->json(['message' => 'Réservation validée avec succès.', 'reservation' => $reservation], 200);
+}
+
+// annuler une réservation
+public function annulerReservation($code) {
+    // Récupérer la réservation par code
+    $reservation = Reservation::where('code', $code)->first();
+
+    if (!$reservation) {
+        return response()->json(['message' => 'Réservation non trouvée'], 404);
+    }
+
+    // Changer le statut en "annulée"
+    $reservation->status = 'annulee';
+    $reservation->save();
+
+    return response()->json(['message' => 'Réservation annulée avec succès.', 'reservation' => $reservation], 200);
+}
+
+// get reservation by code
+public function getReservationByCode(string $code) {
+    try {
+        // Récupérer la réservation avec l'equipment en fonction du code
+
+        $reservation = Reservation::where('code', $code)->with('equipement')->first();
+
+        if (!$reservation) {
+            return response()->json(['message' => 'Réservation non trouvée'], 404);
+        }
+
+        return response()->json(['reservation' => $reservation]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Une erreur est survenue lors de la récupération de la réservation.',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
+
+// rejeter une réservation avec id et envoi d'email
+public function rejeterReservation($id) {
+    // Récupérer la réservation par ID
+    $reservation = Reservation::findOrFail($id);
+
+    // Changer le statut en "refusée"
+    $reservation->status = 'refusee';
+    $reservation->save();
+
+    // Récupérer les informations de l'utilisateur
+    $userEmail = null;
+
+    // Si un utilisateur est connecté, utiliser son e-mail
+    if ($reservation->user_id) {
+        $user = User::find($reservation->user_id);
+        $userEmail = $user ? $user->email : null;
+    } else {
+        // Si pas d'utilisateur connecté, extraire l'e-mail de info_utilisateur
+        $infoUtilisateur = json_decode($reservation->info_utilisateur, true);
+        $userEmail = $infoUtilisateur['email'] ?? null;
+    }
+
+    // Envoyer un e-mail de validation à l'utilisateur
+    if ($userEmail) {
+        Mail::to($userEmail)->send(new ReservationRefused($reservation));
+    }
+
+    return response()->json(['message' => 'Réservation refusée avec succès.', 'reservation' => $reservation], 200);
+}
+
+// get user reservations
+public function getUserReservations() {
+    try {
+        $user = Auth::user();
+        $reservations = $user->reservations()->get();
+        return response()->json(['reservations' => $reservations]);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Une erreur est survenue', 'error' => $e->getMessage()], 500);
+    }
+
 }
 
 }

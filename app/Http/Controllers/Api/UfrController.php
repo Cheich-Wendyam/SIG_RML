@@ -64,7 +64,15 @@ class UfrController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'intitule' => 'sometimes|string|max:255',
+            'description' => 'sometimes|string',
+        ]);
+
+        $ufr = Ufr::findOrFail($id);
+        $ufr->update($request->all());
+
+        return response()->json($ufr);
     }
 
     /**
@@ -72,7 +80,10 @@ class UfrController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $ufr = Ufr::findOrFail($id);
+        $ufr->delete();
+
+        return response()->json(null, 204);
     }
 
 }

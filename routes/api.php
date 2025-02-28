@@ -32,6 +32,7 @@ Route::post('v1/ufrs', [UfrController::class, 'store']);
 Route::get('v1/ufrs', [UfrController::class, 'index']);
 Route::get('v1/ufrs/{id}', [UfrController::class, 'show']);
 Route::put('v1/ufrs/{id}', [UfrController::class, 'update']);
+Route::delete('v1/ufrs/{id}', [UfrController::class, 'destroy']);
 
 Route::middleware(['auth:sanctum', CheckAdmin::class])->group(function () {
 
@@ -74,3 +75,8 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::get('v1/users/role/{role}', [UserController::class, 'getUsersbyRole']);
+Route::post('v1/reservations/rejeter/{id}', [ReservationController::class, 'rejeterReservation']);
+Route::get('v1/reservations/code/{code}', [ReservationController::class, 'getReservationByCode']);
+Route::put('v1/reservations/{id}', [ReservationController::class, 'update'])->middleware('auth:sanctum');
+Route::post('v1/reservations/annuler/{code}', [ReservationController::class, 'annulerReservation']);
+Route::get('v1/user/reservations', [ReservationController::class, 'getUserReservations']);
