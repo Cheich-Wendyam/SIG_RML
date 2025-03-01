@@ -1,2 +1,12 @@
 *
 !.gitignore
+!public/
+!public/*
+!equipements/
+!equipements/*
+!equipements/*.jpg
+!equipements/*.jpeg
+!equipements/*.png
+!equipements/*.gif
+!equipements/*.svg
+!equipements/*.webp
