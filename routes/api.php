@@ -67,7 +67,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('v1/reservations', [ReservationController::class, 'store']);
 });
 Route::post('v1/reservations/guest', [ReservationController::class, 'store']);
-Route::put('v1/reservations/{id}', [ReservationController::class, 'update']);
+Route::put('v1/reservations/update/{id}', [ReservationController::class, 'update']);
 Route::delete('v1/reservations/{id}', [ReservationController::class, 'destroy']);
 
 Route::middleware('auth:sanctum')->group(function () {
