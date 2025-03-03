@@ -89,6 +89,9 @@ class StatistiquesController extends Controller
         //  Calcul du pourcentage des nouveaux utilisateurs prévus pour le mois prochain
         $usersNextMonthPercentage = ($usersNextMonth / max($totalUsers, 1)) * 100;
 
+        // le nombre d'utilisateurs connectés actuellement
+        $users_now = User::where('last_login', '>=', Carbon::now()->subMinutes(5))->count();
+
 
         // Retourner les statistiques en JSON
         return response()->json([
@@ -107,7 +110,8 @@ class StatistiquesController extends Controller
             'total_ufrs' => $totalUfrs,
             'reservations_en_attente' => $reservationsEnAttente,
             'equipements_utilises' => $equipementsUtilises,
-            'equipements_pannes' => $equipementsPannes
+            'equipements_pannes' => $equipementsPannes,
+            'users_now' => $users_now
         ]);
     }
 
