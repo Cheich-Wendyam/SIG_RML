@@ -81,3 +81,4 @@ Route::put('v1/reservations/{id}', [ReservationController::class, 'update'])->mi
 Route::post('v1/reservations/annuler/{code}', [ReservationController::class, 'annulerReservation']);
 Route::get('v1/user/reservations', [ReservationController::class, 'getUserReservations']);
 Route::get('v1/laboratoires/{id}/reservations', [ReservationController::class, 'getReservationsByLaboratoire']);
+Route::get('v1/responsable/laboratoire/{id}', [LaboratoireController::class, 'getLaboratoireByResponsable']);

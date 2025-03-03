@@ -95,4 +95,10 @@ class LaboratoireController extends Controller
         $equipements = $laboratoire->equipements;
         return response()->json($equipements);
     }
+
+    public function getLaboratoireByResponsable($id)
+    {
+        $laboratoire = Laboratoire::where('responsable_id', $id)->get();
+        return response()->json($laboratoire);
+    }
 }
