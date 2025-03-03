@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Models\Reservation;
 use App\Models\Equipement;
 use App\Models\User;
+use App\Models\Laboratoire;
+use App\Models\Ufr;
 use Carbon\Carbon;
 
 class StatistiquesController extends Controller
@@ -20,8 +22,17 @@ class StatistiquesController extends Controller
         // Nombre total d'équipements
         $totalEquipements = Equipement::count();
 
+        // Nombre total de laboratoires
+        $totalLaboratoires = Laboratoire::count();
+
+        // Nombre total d'UFR
+        $totalUfrs = Ufr::count();
+
         // Nombre total d'utilisateurs
         $totalUsers = User::count();
+
+        // le nombre de réservations en attente
+        $reservationsEnAttente = Reservation::where('status', 'en attente')->count();
 
         // Nombre de réservations du mois actuel
         $reservationsCeMois = Reservation::whereMonth('created_at', Carbon::now()->month)->count();
@@ -88,7 +99,10 @@ class StatistiquesController extends Controller
             'users_this_week' => $usersThisWeek,
             'users_this_month' => $usersThisMonth,
             'users_next_month' => round($usersNextMonth),
-            'users_next_month_percentage' => round($usersNextMonthPercentage, 2)
+            'users_next_month_percentage' => round($usersNextMonthPercentage, 2),
+            'total_laboratoires' => $totalLaboratoires,
+            'total_ufrs' => $totalUfrs,
+            'reservations_en_attente' => $reservationsEnAttente,
         ]);
     }
 
