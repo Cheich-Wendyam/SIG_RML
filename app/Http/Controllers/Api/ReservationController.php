@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use App\Mail\ReservationRefused;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Models\Laboratoire;
 
 
 class ReservationController extends Controller
@@ -293,5 +294,21 @@ public function getUserReservations() {
     }
 
 }
+
+// obtenir les reservations des equipements d'un laboratoire
+public function getReservationsByLaboratoire($id)
+{
+    $laboratoire = Laboratoire::with('equipements.reservations')->find($id);
+
+    if (!$laboratoire) {
+        return response()->json(['message' => 'Laboratoire non trouvé'], 404);
+    }
+
+    // Récupérer toutes les réservations des équipements du laboratoire
+    $reservations = $laboratoire->equipements->flatMap->reservations;
+
+    return response()->json($reservations);
+}
+
 
 }

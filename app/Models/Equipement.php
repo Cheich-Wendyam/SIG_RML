@@ -18,4 +18,9 @@ class Equipement extends Model
         return $this->belongsTo(Laboratoire::class);
     }
 
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
 }

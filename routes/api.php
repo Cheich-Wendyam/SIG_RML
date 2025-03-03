@@ -80,3 +80,4 @@ Route::get('v1/reservations/code/{code}', [ReservationController::class, 'getRes
 Route::put('v1/reservations/{id}', [ReservationController::class, 'update'])->middleware('auth:sanctum');
 Route::post('v1/reservations/annuler/{code}', [ReservationController::class, 'annulerReservation']);
 Route::get('v1/user/reservations', [ReservationController::class, 'getUserReservations']);
+Route::get('v1/laboratoires/{id}/reservations', [ReservationController::class, 'getReservationsByLaboratoire']);
