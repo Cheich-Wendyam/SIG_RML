@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -55,6 +56,11 @@ class AuthController extends Controller
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Identifiants incorrects'], 401);
         }
+
+        // Mettre à jour la date de dernière connexion
+        // Mettre à jour le champ last_login avec l'heure actuelle
+        $user->last_login = Carbon::now();
+        $user->save();
 
         // Générer un token d'accès
         $token = $user->createToken('auth_token')->plainTextToken;

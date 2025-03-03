@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\EquipementController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Middleware\EnsureIsResponsible;
 use App\Http\Middleware\CheckAdmin;
+use App\Http\Controllers\Api\StatistiquesController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -55,6 +56,9 @@ Route::middleware(['auth:sanctum', EnsureIsResponsible::class])->group(function 
 
 });
 
+Route::get('v1/statistiques', [StatistiquesController::class, 'index']);
+
+
 Route::get('v1/equipements', [EquipementController::class, 'index']);
 Route::get('v1/equipements/{id}', [EquipementController::class, 'show']);
 Route::post('v1/equipements', [EquipementController::class, 'store']);
@@ -79,6 +83,6 @@ Route::post('v1/reservations/rejeter/{id}', [ReservationController::class, 'reje
 Route::get('v1/reservations/code/{code}', [ReservationController::class, 'getReservationByCode']);
 Route::put('v1/reservations/{id}', [ReservationController::class, 'update'])->middleware('auth:sanctum');
 Route::post('v1/reservations/annuler/{code}', [ReservationController::class, 'annulerReservation']);
-Route::get('v1/user/reservations', [ReservationController::class, 'getUserReservations']);
+Route::get('v1/user/reservations/{id}', [ReservationController::class, 'getUserReservations']);
 Route::get('v1/laboratoires/{id}/reservations', [ReservationController::class, 'getReservationsByLaboratoire']);
 Route::get('v1/responsable/laboratoire/{id}', [LaboratoireController::class, 'getLaboratoireByResponsable']);

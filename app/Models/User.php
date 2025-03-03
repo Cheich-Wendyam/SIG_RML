@@ -58,4 +58,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Laboratoire::class, 'responsable_id');
     }
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class);
+    }
 }

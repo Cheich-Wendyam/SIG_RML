@@ -284,15 +284,20 @@ public function rejeterReservation($id) {
 }
 
 // get user reservations
-public function getUserReservations() {
+public function getUserReservations($user_id) {
     try {
-        $user = Auth::user();
+        $user = User::find($user_id);
+
+        if (!$user) {
+            return response()->json(['message' => 'Utilisateur non trouvé'], 404);
+        }
+
         $reservations = $user->reservations()->get();
         return response()->json(['reservations' => $reservations]);
+
     } catch (\Exception $e) {
         return response()->json(['message' => 'Une erreur est survenue', 'error' => $e->getMessage()], 500);
     }
-
 }
 
 // obtenir les reservations des equipements d'un laboratoire
