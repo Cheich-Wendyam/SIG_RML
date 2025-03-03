@@ -49,6 +49,9 @@ class StatistiquesController extends Controller
 
         //  Équipements les plus utilisés (Top 5)
         $equipementsUtilises = Reservation::select('equipement_id', DB::raw('count(*) as total_reservations'))
+            ->with(['equipement' => function($query) {
+                $query->select('id', 'nom', 'laboratoire_id')->with('laboratoire:id,nom');
+            }])
             ->groupBy('equipement_id')
             ->orderByDesc('total_reservations')
             ->take(5)
@@ -103,6 +106,8 @@ class StatistiquesController extends Controller
             'total_laboratoires' => $totalLaboratoires,
             'total_ufrs' => $totalUfrs,
             'reservations_en_attente' => $reservationsEnAttente,
+            'equipements_utilises' => $equipementsUtilises,
+            'equipements_pannes' => $equipementsPannes
         ]);
     }
 
